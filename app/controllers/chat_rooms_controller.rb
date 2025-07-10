@@ -1,4 +1,5 @@
 class ChatRoomsController < ApplicationController
+
   def create_private_chat
     recipient = User.find(params[:user_id])
 
@@ -16,6 +17,22 @@ class ChatRoomsController < ApplicationController
     end
 
     redirect_to chat_room_path(chat)
+  end
+
+  #list of member excluding me for group chat
+  def new_group
+    @users = User.where.not(id :current_user.id)
+  end
+
+  # group chat create
+
+  def create_group_chat
+    selected_users_ids = params[:user_ids] || []
+    chat_room = ChatRoom.create(chat_type: "group_chat", name: params[:group_name])
+    chat_room.users << current_user
+    chat_room.users << User.where(id: selected_users_ids)
+    redirect_to chat_room_path(chat_room)
+
   end
 
   def show

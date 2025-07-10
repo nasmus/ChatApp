@@ -8,7 +8,9 @@ Rails.application.routes.draw do
   resources :chat_rooms do
     resources :messages, only: [:create]
     collection do
+      get :new_group
       post :create_private_chat
+      post :create_group_chat
     end
   end
 
