@@ -3,7 +3,6 @@
   <div>
     <% @groups.each do |group| %>
       <div class="group-card">
-      <% if group.name != nil %>
         <h3><%= group.name %></h3>
           <p>Members:</p>
         <ul>
@@ -12,8 +11,6 @@
           <% end %>
         </ul>
         <%= link_to "Go to Chat", chat_room_path(group), class: "bg-blue-500 text-white px-2 py-1 rounded" %>
-      <%end%>
-        
       </div>
     <% end %>
   </div>
