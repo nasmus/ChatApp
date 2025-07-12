@@ -20,6 +20,8 @@
             </div>
         </div> -->
         
+
+        
         <!-- Main chat area -->
         <div class="flex-1 flex flex-col">
             <!-- Chat header -->
@@ -35,6 +37,24 @@
                     <%end%>
                 </div>
             </div>
+
+            <% if @chat_room.chat_memberships.find_by(user_id: current_user.id)&.admin? %>
+            <h3 class="text-lg font-semibold mt-4">Promote Member to Moderator</h3>
+
+            <%= form_with url: promote_to_moderator_chat_room_path(@chat_room), method: :patch, local: true do |f| %>
+                <div class="mb-2">
+                <%= f.label :user_id, "Select Member" %>
+                <%= f.select :user_id, options_from_collection_for_select(
+                    @chat_room.chat_memberships.where(chat_role: :member).includes(:user),
+                    :user_id,
+                    ->(membership) { membership.user.name }
+                ), {}, class: "border rounded px-2 py-1" %>
+                </div>
+
+                <%= f.submit "Promote", class: "bg-blue-500 text-white px-3 py-1 rounded" %>
+            <% end %>
+            <% end %>
+
             
             <!-- Messages -->
             <div class="flex-1 p-4 overflow-y-auto bg-gray-50">

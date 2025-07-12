@@ -7,6 +7,9 @@ Rails.application.routes.draw do
   }
   resources :chat_rooms do
     resources :messages, only: [:create]
+    member do
+      post :promote_to_moderator
+    end
     collection do
       get :new_group
       post :create_private_chat

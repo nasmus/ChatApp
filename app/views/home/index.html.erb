@@ -1,5 +1,138 @@
+<div data-controller="hello" class="p-4">
+   <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg ">
+      <div class="flex items-center justify-center mb-4 rounded-sm bg-gray-50 ">
+         
+        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">
+                            Group name
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            Group Admin
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            Group moderatior
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            Group member
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                  <% @groups.each do |group| %>
+                    <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            <%= group.name %>
+                        </th>
+                        <td class="px-6 py-4">
+                            <% admin = group.chat_memberships.find { |m| m.chat_role == "admin" } %>
+                            <% if admin %>
+                               <%= admin.user.name %>
+                            <% else %>
+                              No admin found
+                            <% end %>
+                        </td>
+                        <td class="px-6 py-4">
+                            moderator
+                        </td>
+                        <td class="px-6 py-4">
+                            <% group.users.each do |user| %>
+                              <%= user.name %>
+                            <% end %>
+                        </td>
+                        <td class="px-6 py-4">
+                            <%= link_to "Go to Chat", chat_room_path(group), class: "bg-blue-500 text-white px-2 py-1 rounded" %>
+                        </td>
+                    </tr>
+                  <%end%>
+                </tbody>
+            </table>
+        </div>
 
-<div class="w-full h-screen flex items-center justify-center bg-gray-100 ">
+      </div>
+      <div class="grid grid-cols-2 gap-4 mb-4">
+         <div class="flex items-center justify-center rounded-sm bg-gray-50 ">
+            <div class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+              <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">User Information</h5>
+              <% if user_signed_in? %>
+                <h5 class="mb-2 text-sm font-bold tracking-tight text-gray-900 dark:text-white"><%= current_user.name %></h5>
+                <p class="text-white"><%= current_user.email %></p>
+                <p class="text-white"><%= current_user.user_role %></p>
+              <% end %>
+            </div>
+         </div>
+         <div class="flex items-center justify-center rounded-sm bg-gray-50  ">
+            <div class="max-w-sm ml-15 p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+              <h1 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Chatting Type</h1>
+
+              <!-- Radio Buttons -->
+              <div class="flex">
+                <div class="flex items-center mb-4">
+                  <%= radio_button_tag :chat_type, "private", true, id: "private_chat_radio", class: "h-4 w-4 text-white focus:ring-blue-500 border-gray-300 rounded" %>
+                  <%= label_tag :chat_type_private, "Private Chat", class: "ml-2 block text-white cursor-pointer" %>
+                </div>
+                <div class="flex ml-5 items-center mb-4">
+                  <%= radio_button_tag :chat_type, "group", false, id: "group_chat_radio", class: "h-4 w-4 text-white focus:ring-blue-500 border-gray-300 rounded" %>
+                  <%= label_tag :chat_type_group, "Group Chat", class: "ml-2 block text-white cursor-pointer" %>
+                </div>
+              </div>
+
+              <!-- Private Chat Form -->
+              <div id="private_chat_fields" class="mt-4 text-white">
+                <%= form_with url: create_private_chat_chat_rooms_path, method: :post do |f| %>
+                  <%= label_tag :user_id, "Select Member to Chat:" %><br>
+                  <%= select_tag :user_id, options_from_collection_for_select(@users, :id, :name), prompt: "Choose a user", required: true, class: "w-full text-orange-500 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+                  <div class="flex mt-4 items-center justify-center">
+                    <%= submit_tag "Start Chatting", class: "bg-blue-500 text-white px-4 py-2 rounded hover:cursor-pointer" %>
+                  </div>
+                <% end %>
+              </div>
+
+              <!-- Group Chat Form -->
+              <div id="group_chat_fields" class="mt-4 text-white hidden">
+                <%= form_with url: create_group_chat_chat_rooms_path, method: :post do |gf| %>
+                  <div class="mb-2">
+                    <%= label_tag :group_name, "Group Name:" %><br>
+                    <%= text_field_tag :group_name, nil, required: true, class: "border p-2 w-full" %>
+                  </div>
+
+                  <div class="mb-2">
+                    <%= label_tag :user_ids, "Select Members:" %><br>
+                    <% @users.each do |user| %>
+                      <div>
+                        <%= check_box_tag "user_ids[]", user.id %>
+                        <%= user.name %>
+                      </div>
+                    <% end %>
+                  </div>
+
+                  <div class="flex mt-2 items-center justify-center">
+                    <%= submit_tag "Start Group Chat", class: "bg-green-500 text-white px-4 py-2 rounded hover:cursor-pointer" %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+         </div>
+      </div>
+      <div class="flex items-center justify-center h-48 mb-4 rounded-sm bg-gray-50 ">
+         <p class="text-2xl text-gray-400 ">
+            <svg class="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+            </svg>
+         </p>
+      </div>
+   </div>
+</div>
+
+
+
+<!--
+<div data-controller="chat-type" class="w-full h-screen flex items-center justify-center bg-gray-100 ">
   <div>
     <% @groups.each do |group| %>
       <div class="group-card">
@@ -26,7 +159,7 @@
   <div class="max-w-sm ml-15 p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
     <h1 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Chatting Type</h1>
 
-    <!-- Radio Buttons -->
+    
     <div class="flex">
       <div class="flex items-center mb-4">
         <%= radio_button_tag :chat_type, "private", true, id: "private_chat_radio", class: "h-4 w-4 text-white focus:ring-blue-500 border-gray-300 rounded" %>
@@ -38,7 +171,7 @@
       </div>
     </div>
 
-    <!-- Private Chat Form -->
+    
     <div id="private_chat_fields" class="mt-4 text-white">
       <%= form_with url: create_private_chat_chat_rooms_path, method: :post do |f| %>
         <%= label_tag :user_id, "Select Member to Chat:" %><br>
@@ -49,7 +182,7 @@
       <% end %>
     </div>
 
-    <!-- Group Chat Form -->
+    
     <div id="group_chat_fields" class="mt-4 text-white hidden">
       <%= form_with url: create_group_chat_chat_rooms_path, method: :post do |gf| %>
         <div class="mb-2">
@@ -75,6 +208,87 @@
   </div>
 </div>
 
+<div data-controller="chat-type" class="w-full h-screen flex items-center justify-center bg-gray-100">
+  <div>
+    <% @groups.each do |group| %>
+      <div class="group-card">
+        <h3><%= group.name %></h3>
+        <p>Members:</p>
+        <ul>
+          <% group.users.each do |user| %>
+            <li><%= user.name %></li>
+          <% end %>
+        </ul>
+        <%= link_to "Go to Chat", chat_room_path(group), class: "bg-blue-500 text-white px-2 py-1 rounded" %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">User Information</h5>
+    <% if user_signed_in? %>
+      <h5 class="mb-2 text-sm font-bold tracking-tight text-gray-900 dark:text-white"><%= current_user.name %></h5>
+      <p class="text-white"><%= current_user.email %></p>
+      <p class="text-white"><%= current_user.user_role %></p>
+    <% end %>
+  </div>
+
+  <div class="max-w-sm ml-15 p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+    <h1 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Chatting Type</h1>
+
+    <div class="flex">
+      <div class="flex items-center mb-4">
+        <%= radio_button_tag :chat_type, "private", true,
+              id: "private_chat_radio",
+              class: "h-4 w-4 text-white focus:ring-blue-500 border-gray-300 rounded",
+              data: { chat_type_target: "privateRadio", action: "change->chat-type#change" } %>
+        <%= label_tag :chat_type_private, "Private Chat", class: "ml-2 block text-white cursor-pointer" %>
+      </div>
+
+      <div class="flex ml-5 items-center mb-4">
+        <%= radio_button_tag :chat_type, "group", false,
+              id: "group_chat_radio",
+              class: "h-4 w-4 text-white focus:ring-blue-500 border-gray-300 rounded",
+              data: { chat_type_target: "groupRadio", action: "change->chat-type#change" } %>
+        <%= label_tag :chat_type_group, "Group Chat", class: "ml-2 block text-white cursor-pointer" %>
+      </div>
+    </div>
+
+    <div data-chat-type-target="privateFields" id="private_chat_fields" class="mt-4 text-white">
+      <%= form_with url: create_private_chat_chat_rooms_path, method: :post do |f| %>
+        <%= label_tag :user_id, "Select Member to Chat:" %><br>
+        <%= select_tag :user_id, options_from_collection_for_select(@users, :id, :name), prompt: "Choose a user", required: true, class: "w-full text-orange-500 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+        <div class="flex mt-4 items-center justify-center">
+          <%= submit_tag "Start Chatting", class: "bg-blue-500 text-white px-4 py-2 rounded hover:cursor-pointer" %>
+        </div>
+      <% end %>
+    </div>
+
+    <div data-chat-type-target="groupFields" id="group_chat_fields" class="mt-4 text-white hidden">
+      <%= form_with url: create_group_chat_chat_rooms_path, method: :post do |gf| %>
+        <div class="mb-2">
+          <%= label_tag :group_name, "Group Name:" %><br>
+          <%= text_field_tag :group_name, nil, required: true, class: "border p-2 w-full" %>
+        </div>
+
+        <div class="mb-2">
+          <%= label_tag :user_ids, "Select Members:" %><br>
+          <% @users.each do |user| %>
+            <div>
+              <%= check_box_tag "user_ids[]", user.id %>
+              <%= user.name %>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="flex mt-2 items-center justify-center">
+          <%= submit_tag "Start Group Chat", class: "bg-green-500 text-white px-4 py-2 rounded hover:cursor-pointer" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+-->
 
 
 
