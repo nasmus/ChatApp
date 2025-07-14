@@ -1,5 +1,7 @@
 class ChatRoomsController < ApplicationController
   before_action :ensure_user_is_member, only: [:show]
+  before_action :set_chat_room, only: [:promote_to_moderator, :destroy, :admin_and_moderator_can_add_new_member, :show, :admin_remove_member]
+  before_action :ensure_current_user_is_admin, only: [:promote_to_moderator, :admin_remove_member]
 
   def create_private_chat
     recipient = User.find(params[:user_id])
@@ -46,18 +48,7 @@ class ChatRoomsController < ApplicationController
   #admin can make a new moderator
 
   def promote_to_moderator
-    @chat_room = ChatRoom.find(params[:id])
-
-    # Ensure current user is admin of this group
-    admin_membership = @chat_room.chat_memberships.find_by(user_id: current_user.id)
-
-      unless admin_membership&.admin?
-        redirect_to chat_room_path(@chat_room), alert: "Only admins can promote members."
-      return
-    end
-
     user_ids = params[:user_ids] || []
-
     if user_ids.any?
       # selected member should be moderator
       memberships = @chat_room.chat_memberships.where(user_id: user_ids, chat_role: :member)
@@ -72,7 +63,7 @@ class ChatRoomsController < ApplicationController
 
   #delete chat group and deleted by only admin
   def destroy
-    @chat_room = ChatRoom.find(params[:id])
+    
     admin_Check = @chat_room.chat_memberships.find_by(user_id: current_user.id, chat_role: :admin)
     if admin_Check
       @chat_room.destroy
@@ -82,8 +73,8 @@ class ChatRoomsController < ApplicationController
     end
   end
 
+  #admin and modertor add new member to there chat group
   def admin_and_moderator_can_add_new_member
-    @chat_room = ChatRoom.find(params[:id])
     current_user_membership = @chat_room.chat_memberships.find_by(user_id: current_user.id)
     unless current_user_membership&.admin? || current_user_membership&.moderator?
       redirect_to chat_room_path(@chat_room), notice:"only admin and moderator can add new member"
@@ -96,9 +87,18 @@ class ChatRoomsController < ApplicationController
     redirect_to chat_room_path(@chat_room), notice: "selected user havebeen created to this group" 
   end
 
+  def admin_remove_member
+    membership = @chat_room.chat_memberships.find_by(user_id: params[:user_id])
+    user_ids = params[:user_ids] || []
+    user_ids.each do |user_id|
+      membership = @chat_room.chat_memberships.find_by(user_id: user_id)
+      membership.destroy if membership && !membership.admin?
+    end
+    redirect_to chat_room_path(@chat_room), notice: "member is successfully deleted"
+  end
+
 
   def show
-    @chat_room = ChatRoom.find(params[:id])
     @messages = @chat_room.messages.order(:created_at)
     @message = Message.new
     @members_for_promotion = ChatMembership.where(chat_room_id: @chat_room.id, chat_role: ChatMembership.chat_roles[:member]).includes(:user)
@@ -116,4 +116,21 @@ class ChatRoomsController < ApplicationController
         redirect_to root_path
       end
     end
+
+    # find chat room id and store is chat_room variable 
+    def set_chat_room
+      @chat_room = ChatRoom.find(params[:id])
+    end
+
+
+    #cureent user is admin or not
+    def ensure_current_user_is_admin
+      admin_membership = @chat_room.chat_memberships.find_by(user_id: current_user.id)
+
+      unless admin_membership&.admin?
+          redirect_to chat_room_path(@chat_room), alert: "Only admins can promote members."
+        return
+      end
+    end
+
 end

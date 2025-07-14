@@ -61,6 +61,28 @@
                         </div>
                     <%end%>
                 </div>
+                <div>
+                    <% if @chat_room.chat_memberships.find_by(user_id: current_user.id)&.admin? %>
+                        <div class="m-4">
+                            <h1 class="text-lg font-semibold mt-8 item-center p-1 bg-cyan-800 text-white item-center"> All User List </h1>
+                        </div>
+                        <div>
+                        <%= form_with url: admin_remove_member_chat_room_path(@chat_room), method: :delete, local: true do |d| %>
+                            <div class="mb-4">
+                                <% @chat_room.chat_memberships.each do |membership| %>
+                                    <% unless membership.admin? %> <!-- Admin remove option hidden -->
+                                        <div>
+                                            <%= check_box_tag "user_ids[]", membership.user.id, false, id: "user_#{membership.user.id}" %>
+                                            <%= label_tag "user_#{membership.user.id}", membership.user.name %>
+                                        </div>
+                                    <% end %>
+                                <%end%>
+                            </div>
+                            <%= d.submit "Remove member", class: "bg-pink-700 text-white px-3 py-1 rounded hover:cursor-pointer " %>
+                        <%end%>
+                        </div>
+                    <% end %>
+                </div>
             </div>
             
 
