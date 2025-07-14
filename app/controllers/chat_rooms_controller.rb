@@ -70,6 +70,7 @@ class ChatRoomsController < ApplicationController
     end
   end
 
+  #delete chat group and deleted by only admin
   def destroy
     @chat_room = ChatRoom.find(params[:id])
     admin_Check = @chat_room.chat_memberships.find_by(user_id: current_user.id, chat_role: :admin)
@@ -81,12 +82,27 @@ class ChatRoomsController < ApplicationController
     end
   end
 
+  def admin_and_moderator_can_add_new_member
+    @chat_room = ChatRoom.find(params[:id])
+    current_user_membership = @chat_room.chat_memberships.find_by(user_id: current_user.id)
+    unless current_user_membership&.admin? || current_user_membership&.moderator?
+      redirect_to chat_room_path(@chat_room), notice:"only admin and moderator can add new member"
+    end
+    user_ids = params[:user_ids] || []
+
+    user_ids.each do |user_id|
+      ChatMembership.create(user_id: user_id, chat_room_id: @chat_room.id, chat_role: :member)
+    end
+    redirect_to chat_room_path(@chat_room), notice: "selected user havebeen created to this group" 
+  end
+
 
   def show
     @chat_room = ChatRoom.find(params[:id])
     @messages = @chat_room.messages.order(:created_at)
     @message = Message.new
     @members_for_promotion = ChatMembership.where(chat_room_id: @chat_room.id, chat_role: ChatMembership.chat_roles[:member]).includes(:user)
+    @members_not_in_groups = User.where.not(id: @chat_room.users.pluck(:id))
   end
 
   

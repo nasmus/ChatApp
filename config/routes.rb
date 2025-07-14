@@ -9,6 +9,7 @@ Rails.application.routes.draw do
     resources :messages, only: [:create]
     member do
       patch :promote_to_moderator
+      post :admin_and_moderator_can_add_new_member
     end
     collection do
       get :new_group
