@@ -20,6 +20,27 @@
             </div>
         </div> -->
         
+            <% if @chat_room.chat_memberships.find_by(user_id: current_user.id)&.admin? %>
+            <h3 class="text-lg font-semibold mt-4">make them as a moderator</h3>
+
+                <%= form_with url: promote_to_moderator_chat_room_path(@chat_room), method: :patch, local: true do |f| %>
+                    <div class="mb-2">
+                    <% @members_for_promotion.each do |membership| %>
+                        <div>
+                        <%= check_box_tag "user_ids[]", membership.user.id, false, id: "user_#{membership.user.id}" %>
+                        <%= label_tag "user_#{membership.user.id}", membership.user.name %>
+                        </div>
+                    <% end %>
+                    </div>
+
+                    <%= f.submit "submit", class: "bg-blue-500 text-white px-3 py-1 rounded " %>
+                <% end %>
+            <% end %>
+
+
+        
+
+        
 
         
         <!-- Main chat area -->
@@ -38,22 +59,8 @@
                 </div>
             </div>
 
-            <% if @chat_room.chat_memberships.find_by(user_id: current_user.id)&.admin? %>
-            <h3 class="text-lg font-semibold mt-4">Promote Member to Moderator</h3>
+           
 
-            <%= form_with url: promote_to_moderator_chat_room_path(@chat_room), method: :patch, local: true do |f| %>
-                <div class="mb-2">
-                <%= f.label :user_id, "Select Member" %>
-                <%= f.select :user_id, options_from_collection_for_select(
-                    @chat_room.chat_memberships.where(chat_role: :member).includes(:user),
-                    :user_id,
-                    ->(membership) { membership.user.name }
-                ), {}, class: "border rounded px-2 py-1" %>
-                </div>
-
-                <%= f.submit "Promote", class: "bg-blue-500 text-white px-3 py-1 rounded" %>
-            <% end %>
-            <% end %>
 
             
             <!-- Messages -->

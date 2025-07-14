@@ -50,40 +50,54 @@ class ChatRoomsController < ApplicationController
 
     # Ensure current user is admin of this group
     admin_membership = @chat_room.chat_memberships.find_by(user_id: current_user.id)
-    unless admin_membership&.admin?
-      redirect_to chat_room_path(@chat_room), alert: "Only admins can promote members."
+
+      unless admin_membership&.admin?
+        redirect_to chat_room_path(@chat_room), alert: "Only admins can promote members."
       return
     end
 
+    user_ids = params[:user_ids] || []
 
-    membership = @chat_room.chat_memberships.find_by(user_id: params[:user_id])
-
-    if membership && membership.member?
-      membership.update(role: :moderator)
-      redirect_to chat_room_path(@chat_room), notice: "User promoted to moderator."
+    if user_ids.any?
+      # selected member should be moderator
+      memberships = @chat_room.chat_memberships.where(user_id: user_ids, chat_role: :member)
+      memberships.each do |membership|
+        membership.update(chat_role: :moderator)
+      end
+      redirect_to chat_room_path(@chat_room), notice: "Selected members promoted to moderator."
     else
-      redirect_to chat_room_path(@chat_room), alert: "Cannot promote this user."
+      redirect_to chat_room_path(@chat_room), alert: "No members selected."
     end
   end
+
+  def destroy
+    @chat_room = ChatRoom.find(params[:id])
+    admin_Check = @chat_room.chat_memberships.find_by(user_id: current_user.id, chat_role: :admin)
+    if admin_Check
+      @chat_room.destroy
+      redirect_to root_path, notice:"group delete successfully"
+    else
+      redirect_to root_path, alert:"only admin can delete this group"
+    end
+  end
+
 
   def show
     @chat_room = ChatRoom.find(params[:id])
     @messages = @chat_room.messages.order(:created_at)
     @message = Message.new
-    @memberships = @chat_room.chat_memberships.includes(:user)
+    @members_for_promotion = ChatMembership.where(chat_room_id: @chat_room.id, chat_role: ChatMembership.chat_roles[:member]).includes(:user)
   end
+
+  
 
   private 
     #can't access any other chat
     def ensure_user_is_member
       @chat_room = ChatRoom.find(params[:id])
-
       unless @chat_room.users.include?(current_user)
         flash[:alert] = "You are not authorized to access this chat."
         redirect_to root_path
       end
     end
-
-
-
 end
