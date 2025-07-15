@@ -92,12 +92,37 @@
             <div class="p-4 border-b border-gray-200 bg-white flex items-center">
                 <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">JD</div>
                 <div class="ml-3">
-                    <% if @groups.present? %>
+                    <% if @chat_room.private_chat? %>
                         <h3 class="font-medium"><%= @chat_room.users.where.not(id: current_user.id).first.name %></h3>
                         <p class="text-sm text-gray-500">Online</p>
                     <% else %>
+                        <% if @current_member_is_admin %>
+                        <div class="flex items-center justify-between w-full">
+                            <div id="group-name-display">
+                            <h3 class="font-medium"><%= @chat_room.name %></h3>
+                            </div>
+
+                            <div class="flex items-center justify-center ml-3 cursor-pointer" onclick="document.getElementById('edit-group-name-form').classList.toggle('hidden'); document.getElementById('group-name-display').classList.toggle('hidden')">
+                            <!-- Edit SVG -->
+                            <svg class="w-6 h-6 text-gray-800 " xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                            </div>
+                        </div>
+
+                        <div id="edit-group-name-form" class="hidden mt-2">
+                            <%= form_with model: @chat_room, url: update_group_name_chat_room_path(@chat_room), method: :patch, local: true do |f| %>
+                                <%= f.text_field :name, class: "border rounded p-1" %>
+                                <%= f.submit "Save", class: "bg-green-600 text-white px-2 py-1 rounded ml-2" %>
+                            <% end %>
+                        </div>
+                        <% else %>
                         <h3 class="font-medium"><%= @chat_room.name %></h3>
+                        <% end %>
+                        
                         <p class="text-sm text-gray-500">Online</p>
+                        
+                        
                     <%end%>
                 </div>
             </div>

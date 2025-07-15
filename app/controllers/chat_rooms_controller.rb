@@ -1,7 +1,7 @@
 class ChatRoomsController < ApplicationController
   before_action :ensure_user_is_member, only: [:show]
-  before_action :set_chat_room, only: [:promote_to_moderator, :destroy, :admin_and_moderator_can_add_new_member, :show, :admin_remove_member, :update_group_name, :destroy_group_message]
-  before_action :ensure_current_user_is_admin, only: [:promote_to_moderator, :admin_remove_member, :update_group_name]
+  before_action :set_chat_room, only: [:promote_to_moderator, :destroy, :admin_and_moderator_can_add_new_member, :show, :admin_remove_member, :destroy_group_message, :edit, :update_group_name]
+  before_action :ensure_current_user_is_admin, only: [:promote_to_moderator, :admin_remove_member, :edit, :update_group_name]
 
 
   def create_private_chat
@@ -24,7 +24,7 @@ class ChatRoomsController < ApplicationController
     redirect_to chat_room_path(chat)
   end
 
-  #list of member excluding me for group chat
+  #list of member excluding me for this group chat
   def new_group
     @users = User.where.not(id :current_user.id)
   end
@@ -87,6 +87,7 @@ class ChatRoomsController < ApplicationController
     redirect_to chat_room_path(@chat_room), notice: "selected user havebeen created to this group" 
   end
 
+  #admin can remove member from group chat
   def admin_remove_member
     membership = @chat_room.chat_memberships.find_by(user_id: params[:user_id])
     user_ids = params[:user_ids] || []
@@ -97,10 +98,8 @@ class ChatRoomsController < ApplicationController
     redirect_to chat_room_path(@chat_room), notice: "member is successfully deleted"
   end
 
-  def update_group_name
-
-  end
-
+  
+  #admin and moderator can delete suspicias group message
   def destroy_group_message
     @message = @chat_room.messages.find(params[:message_id])
     admin_membership = @chat_room.chat_memberships.find_by(user_id: current_user.id)
@@ -113,12 +112,25 @@ class ChatRoomsController < ApplicationController
     end
   end
 
+  def edit
+  end
+
+
+  def update_group_name
+    if @chat_room.update(chat_room_params)
+      redirect_to chat_room_path(@chat_room), notice: "Group name updated successfully."
+    else
+      render :edit, alert: "Failed to update group name."
+    end
+  end
+
 
   def show
     @messages = @chat_room.messages.order(:created_at)
     @message = Message.new
     @members_for_promotion = ChatMembership.where(chat_room_id: @chat_room.id, chat_role: ChatMembership.chat_roles[:member]).includes(:user)
     @members_not_in_groups = User.where.not(id: @chat_room.users.pluck(:id))
+
     admin_membership = @chat_room.chat_memberships.find_by(user_id: current_user.id)
     @current_member_is_admin = admin_membership&.admin?
     @current_member_is_moderator = admin_membership&.moderator?
@@ -139,6 +151,10 @@ class ChatRoomsController < ApplicationController
     # find chat room id and store is chat_room variable 
     def set_chat_room
       @chat_room = ChatRoom.find(params[:id])
+    end
+
+    def chat_room_params
+      params.require(:chat_room).permit(:name)
     end
 
 

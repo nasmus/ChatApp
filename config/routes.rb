@@ -12,6 +12,7 @@ Rails.application.routes.draw do
       post :admin_and_moderator_can_add_new_member
       delete :admin_remove_member
       delete :destroy_group_message
+      patch :update_group_name
     end
     collection do
       get :new_group
