@@ -102,9 +102,7 @@ class ChatRoomsController < ApplicationController
   end
 
   def destroy_group_message
-    @message = Message.find(params[:message_id])
-    @chat_room = @message.chat_room
-
+    @message = @chat_room.messages.find(params[:message_id])
     admin_membership = @chat_room.chat_memberships.find_by(user_id: current_user.id)
 
     if admin_membership&.admin? || admin_membership&.moderator?
