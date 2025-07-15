@@ -1,7 +1,8 @@
 class ChatRoomsController < ApplicationController
   before_action :ensure_user_is_member, only: [:show]
-  before_action :set_chat_room, only: [:promote_to_moderator, :destroy, :admin_and_moderator_can_add_new_member, :show, :admin_remove_member]
-  before_action :ensure_current_user_is_admin, only: [:promote_to_moderator, :admin_remove_member]
+  before_action :set_chat_room, only: [:promote_to_moderator, :destroy, :admin_and_moderator_can_add_new_member, :show, :admin_remove_member, :update_group_name, :destroy_group_message]
+  before_action :ensure_current_user_is_admin, only: [:promote_to_moderator, :admin_remove_member, :update_group_name]
+
 
   def create_private_chat
     recipient = User.find(params[:user_id])
@@ -63,7 +64,6 @@ class ChatRoomsController < ApplicationController
 
   #delete chat group and deleted by only admin
   def destroy
-    
     admin_Check = @chat_room.chat_memberships.find_by(user_id: current_user.id, chat_role: :admin)
     if admin_Check
       @chat_room.destroy
@@ -97,12 +97,33 @@ class ChatRoomsController < ApplicationController
     redirect_to chat_room_path(@chat_room), notice: "member is successfully deleted"
   end
 
+  def update_group_name
+
+  end
+
+  def destroy_group_message
+    @message = Message.find(params[:message_id])
+    @chat_room = @message.chat_room
+
+    admin_membership = @chat_room.chat_memberships.find_by(user_id: current_user.id)
+
+    if admin_membership&.admin? || admin_membership&.moderator?
+      @message.destroy
+      redirect_to chat_room_path(@chat_room), notice: "Message deleted successfully."
+    else
+      redirect_to chat_room_path(@chat_room), alert: "Only admins can delete messages."
+    end
+  end
+
 
   def show
     @messages = @chat_room.messages.order(:created_at)
     @message = Message.new
     @members_for_promotion = ChatMembership.where(chat_room_id: @chat_room.id, chat_role: ChatMembership.chat_roles[:member]).includes(:user)
     @members_not_in_groups = User.where.not(id: @chat_room.users.pluck(:id))
+    admin_membership = @chat_room.chat_memberships.find_by(user_id: current_user.id)
+    @current_member_is_admin = admin_membership&.admin?
+    @current_member_is_moderator = admin_membership&.moderator?
   end
 
   
@@ -126,9 +147,8 @@ class ChatRoomsController < ApplicationController
     #cureent user is admin or not
     def ensure_current_user_is_admin
       admin_membership = @chat_room.chat_memberships.find_by(user_id: current_user.id)
-
-      unless admin_membership&.admin?
-          redirect_to chat_room_path(@chat_room), alert: "Only admins can promote members."
+        unless admin_membership&.admin?
+          redirect_to chat_room_path(@chat_room), alert: "Only admins can do this."
         return
       end
     end

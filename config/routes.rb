@@ -11,6 +11,7 @@ Rails.application.routes.draw do
       patch :promote_to_moderator
       post :admin_and_moderator_can_add_new_member
       delete :admin_remove_member
+      delete :destroy_group_message
     end
     collection do
       get :new_group
