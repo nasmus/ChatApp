@@ -9,11 +9,12 @@ class ChatRoomsController < ApplicationController
 
     #check private chat exist or not
     chat = ChatRoom.joins(:chat_memberships)
-               .where(chat_type: "private_chat")
-               .group("chat_rooms.id")
-               .having("COUNT(DISTINCT chat_memberships.user_id) = 2")
-               .where(chat_memberships: { user_id: [current_user.id, recipient.id] })
-               .first
+              .where(chat_type: "private_chat")
+              .group("chat_rooms.id")
+              .having("COUNT(chat_memberships.user_id) = 2")
+              .where(chat_memberships: { user_id: [current_user.id, recipient.id] })
+              .first
+
     #if private chat is not exist then create it 
     unless chat
       chat = ChatRoom.create(chat_type: "private_chat")
@@ -24,34 +25,44 @@ class ChatRoomsController < ApplicationController
     redirect_to chat_room_path(chat)
   end
 
-  #list of member excluding me for this group chat
-  def new_group
-    @users = User.where.not(id :current_user.id)
-  end
-
-  #need to check hear any particular group exist or not
 
   # group chat create
 
   def create_group_chat
-    selected_users_ids = params[:user_ids] || []
-    chat_room = ChatRoom.create(chat_type: "group_chat", name: params[:group_name])
-    # chat_room.users << current_user
-    # chat_room.users << User.where(id: selected_users_ids)
-    ChatMembership.create(user:current_user, chat_room: chat_room, chat_role: "admin")
+     selected_users_ids = params[:user_ids] || []
+     group_user_ids = selected_users_ids.map(&:to_i) + [current_user.id]
 
-    User.where(id:selected_users_ids).each do |user|
-      ChatMembership.create(user: user, chat_room: chat_room, chat_role: "member")
+    existing_group = ChatRoom.joins(:chat_memberships)
+                    .where(chat_type: "group_chat")
+                    .group("chat_rooms.id")
+                    .having("COUNT(chat_memberships.user_id) = ?", group_user_ids.size)
+                    .select { |chat_room| 
+                      (chat_room.users.pluck(:id).sort == group_user_ids.sort)
+                    }
+                    .first
+    if existing_group
+      redirect_to chat_room_path(existing_group)
+    else
+      chat_room = ChatRoom.create(chat_type: "group_chat", name: params[:group_name])
+      ChatMembership.create(user:current_user, chat_room: chat_room, chat_role: "admin")
+
+      User.where(id:selected_users_ids).each do |user|
+         ChatMembership.create(user: user, chat_room: chat_room, chat_role: "member")
+      end
+      redirect_to chat_room_path(chat_room)
     end
-    redirect_to chat_room_path(chat_room)
   end
+
+  #list of member excluding me for this group chat
+  # def new_group
+  #   @users = User.where.not(id :current_user.id)
+  # end
 
   #admin can make a new moderator
 
   def promote_to_moderator
     user_ids = params[:user_ids] || []
     if user_ids.any?
-      # selected member should be moderator
       memberships = @chat_room.chat_memberships.where(user_id: user_ids, chat_role: :member)
       memberships.each do |membership|
         membership.update(chat_role: :moderator)
@@ -89,11 +100,12 @@ class ChatRoomsController < ApplicationController
 
   #admin can remove member from group chat
   def admin_remove_member
-    membership = @chat_room.chat_memberships.find_by(user_id: params[:user_id])
     user_ids = params[:user_ids] || []
     user_ids.each do |user_id|
       membership = @chat_room.chat_memberships.find_by(user_id: user_id)
-      membership.destroy if membership && !membership.admin?
+      if membership && !membership.admin?
+        membership.destroy 
+      end
     end
     redirect_to chat_room_path(@chat_room), notice: "member is successfully deleted"
   end
@@ -115,7 +127,6 @@ class ChatRoomsController < ApplicationController
   def edit
   end
 
-
   def update_group_name
     if @chat_room.update(chat_room_params)
       redirect_to chat_room_path(@chat_room), notice: "Group name updated successfully."
@@ -136,7 +147,6 @@ class ChatRoomsController < ApplicationController
     @current_member_is_moderator = admin_membership&.moderator?
   end
 
-  
 
   private 
     #can't access any other chat
@@ -156,7 +166,6 @@ class ChatRoomsController < ApplicationController
     def chat_room_params
       params.require(:chat_room).permit(:name)
     end
-
 
     #cureent user is admin or not
     def ensure_current_user_is_admin

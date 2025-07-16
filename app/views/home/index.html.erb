@@ -1,7 +1,6 @@
 <div data-controller="hello" class="p-4">
    <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg ">
       <div class="flex items-center justify-center mb-4 rounded-sm bg-gray-50 ">
-         
         <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
             <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 ">
@@ -58,17 +57,16 @@
                             <%= button_to "Delete", chat_room_path(group), method: :delete,
                                 data: { confirm: "Are you sure you want to delete this group?" },
                                 class: "bg-red-500 text-white px-2 py-1 rounded hover:cursor-pointer" %>
-                          <% end %>
+                            <% end %>
                         </td>
                     </tr>
                   <%end%>
                 </tbody>
             </table>
         </div>
-
       </div>
       <div class="grid grid-cols-2 gap-4 mb-4">
-         <div class="flex items-center justify-center rounded-sm bg-gray-50 ">
+          <div class="flex items-center justify-center rounded-sm bg-gray-50 ">
             <div class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-sm ">
               <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 ">User Information</h5>
               <% if user_signed_in? %>
@@ -77,12 +75,15 @@
                 <p ><%= current_user.user_role %></p>
               <% end %>
             </div>
-         </div>
-         <div class="flex items-center justify-center rounded-sm bg-gray-50  ">
+          </div>
+
+          <!-- chatting type from hear -->
+
+          <div data-controller='chat_rooms' class="flex items-center justify-center rounded-sm bg-gray-50  ">
             <div class="max-w-sm ml-15 p-6 bg-white border border-gray-200 rounded-lg shadow-sm ">
               <h1 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 ">Chatting Type</h1>
 
-              <!-- Radio Buttons -->
+              
               <div class="flex">
                 <div class="flex items-center mb-4">
                   <%= radio_button_tag :chat_type, "private", true, id: "private_chat_radio", class: "h-4 w-4 focus:ring-blue-500 border-gray-300 rounded" %>
@@ -94,7 +95,7 @@
                 </div>
               </div>
 
-              <!-- Private Chat Form -->
+              
               <div id="private_chat_fields" class="mt-4 ">
                 <%= form_with url: create_private_chat_chat_rooms_path, method: :post do |f| %>
                   <%= label_tag :user_id, "Select Member For Private Chat:" %><br>
@@ -105,12 +106,12 @@
                 <% end %>
               </div>
 
-              <!-- Group Chat Form -->
+              
               <div id="group_chat_fields" class="mt-4  hidden">
                 <%= form_with url: create_group_chat_chat_rooms_path, method: :post do |gf| %>
                   <div class="mb-2">
                     <%= label_tag :group_name, "Group Name:" %><br>
-                    <%= text_field_tag :group_name, nil, required: true, class: "border p-2 w-full" %>
+                    <%= text_field_tag :group_name, nil,  class: "border p-2 w-full" %>
                   </div>
 
                   <div class="mb-2">
@@ -122,14 +123,15 @@
                       </div>
                     <% end %>
                   </div>
-
                   <div class="flex mt-2 items-center justify-center">
                     <%= submit_tag "Start Group Chat", class: "bg-green-500 text-white px-4 py-2 rounded hover:cursor-pointer" %>
                   </div>
                 <% end %>
               </div>
             </div>
-         </div>
+          </div>
+          
+          
       </div>
       <div class="flex items-center justify-center h-48 mb-4 rounded-sm bg-gray-50 ">
          <p class="text-2xl text-gray-400 ">
@@ -221,20 +223,6 @@
 </div>
 
 <div data-controller="chat-type" class="w-full h-screen flex items-center justify-center bg-gray-100">
-  <div>
-    <% @groups.each do |group| %>
-      <div class="group-card">
-        <h3><%= group.name %></h3>
-        <p>Members:</p>
-        <ul>
-          <% group.users.each do |user| %>
-            <li><%= user.name %></li>
-          <% end %>
-        </ul>
-        <%= link_to "Go to Chat", chat_room_path(group), class: "bg-blue-500 text-white px-2 py-1 rounded" %>
-      </div>
-    <% end %>
-  </div>
 
   <div class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
     <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">User Information</h5>
