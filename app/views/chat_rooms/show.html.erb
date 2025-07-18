@@ -21,47 +21,6 @@
         </div> -->
             <div>
                 <div>
-                    <% if @current_member_is_admin && @chat_room.group_chat? %>
-                    <div class="m-4">
-                        <h3 class="text-lg font-semibold mt-4 p-1 bg-cyan-800 text-white">Group Member List</h3>
-                    </div>
-                    <div>
-                        <%= form_with url: promote_to_moderator_chat_room_path(@chat_room), method: :patch, local: true do |f| %>
-                            <div class="mb-2">
-                            <% @members_for_promotion.each do |membership| %>
-                                <div>
-                                <%= check_box_tag "user_ids[]", membership.user.id, false, id: "user_#{membership.user.id}" %>
-                                <%= label_tag "user_#{membership.user.id}", membership.user.name %>
-                                </div>
-                            <% end %>
-                            </div>
-
-                            <%= f.submit "Add Moderator", class: "bg-pink-700 text-white px-3 py-1 rounded hover:cursor-pointer " %>
-                        <% end %>
-                    </div>
-                    <% end %>
-                    </div>
-                <div>
-                    <% if (@current_member_is_admin || @current_member_is_moderator) && @chat_room.group_chat? %>
-                        <div class="m-4">
-                            <h1 class="text-lg font-semibold mt-8 item-center p-1 bg-cyan-800 text-white item-center"> All User List </h1>
-                        </div>
-                        <div>
-                        <%= form_with url: admin_and_moderator_can_add_new_member_chat_room_path(@chat_room), method: :post, local: true do |admin| %>
-                            <div class="mb-4">
-                                <% @members_not_in_groups.each do |user| %>
-                                    <div>
-                                        <%= check_box_tag "user_ids[]", user.id, false, id: "user_#{user.id}" %>
-                                        <%= label_tag "user_#{user.id}", user.name %>
-                                    </div>
-                                <%end%>
-                            </div>
-                            <%= admin.submit "Add New Member", class: "bg-pink-700 text-white px-3 py-1 rounded hover:cursor-pointer " %>
-                        <%end%>
-                        </div>
-                    <%end%>
-                </div>
-                <div>
                     <% if @current_member_is_admin %>
                         <div class="m-4">
                             <h1 class="text-lg font-semibold mt-8 item-center p-1 bg-cyan-800 text-white item-center"> All User List </h1>
@@ -89,39 +48,111 @@
         <!-- Main chat area -->
         <div class="flex-1 flex flex-col">
             <!-- Chat header -->
-            <div class="p-4 border-b border-gray-200 bg-white flex items-center">
-                <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">JD</div>
-                <div class="ml-3">
-                    <% if @chat_room.private_chat? %>
-                        <h3 class="font-medium"><%= @chat_room.users.where.not(id: current_user.id).first.name %></h3>
-                        <p class="text-sm text-gray-500">Online</p>
-                    <% else %>
-                        <% if @current_member_is_admin %>
-                            <div class="flex items-center justify-between w-full">
-                                <div id="group-name-display">
-                                    <h3 class="font-medium"><%= @chat_room.name %></h3>
+            <div class="p-4 border-b border-gray-200 bg-white flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
+                        JD
+                    </div>
+                    <div class="ml-3">
+                        <% if @chat_room.private_chat? %>
+                            <h3 class="font-medium"><%= @chat_room.users.where.not(id: current_user.id).first.name %></h3>
+                            <p class="text-sm text-gray-500">Online</p>
+                        <% else %>
+                            <% if @current_member_is_admin %>
+                                <div class="flex items-center justify-between w-full">
+                                    <div id="group-name-display">
+                                        <h3 class="font-medium"><%= @chat_room.name %></h3>
+                                    </div>
+
+                                    <div id="group-name-display2" class="flex items-center justify-center ml-3 cursor-pointer" onclick="document.getElementById('edit-group-name-form').classList.toggle('hidden'); document.getElementById('group-name-display').classList.toggle('hidden'); document.getElementById('group-name-display2').classList.toggle('hidden')">
+                                    <!-- Edit SVG -->
+                                        <svg  class="w-6 h-6 text-gray-800 hover:text-pink-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                            <path fill-rule="evenodd" d="M14 4.182A4.136 4.136 0 0 1 16.9 3c1.087 0 2.13.425 2.899 1.182A4.01 4.01 0 0 1 21 7.037c0 1.068-.43 2.092-1.194 2.849L18.5 11.214l-5.8-5.71 1.287-1.31.012-.012Zm-2.717 2.763L6.186 12.13l2.175 2.141 5.063-5.218-2.141-2.108Zm-6.25 6.886-1.98 5.849a.992.992 0 0 0 .245 1.026 1.03 1.03 0 0 0 1.043.242L10.282 19l-5.25-5.168Zm6.954 4.01 5.096-5.186-2.218-2.183-5.063 5.218 2.185 2.15Z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
                                 </div>
 
-                                <div class="flex items-center justify-center ml-3 cursor-pointer" onclick="document.getElementById('edit-group-name-form').classList.toggle('hidden'); document.getElementById('group-name-display').classList.toggle('hidden')">
-                                <!-- Edit SVG -->
-                                    <svg class="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                        <path fill-rule="evenodd" d="M14 4.182A4.136 4.136 0 0 1 16.9 3c1.087 0 2.13.425 2.899 1.182A4.01 4.01 0 0 1 21 7.037c0 1.068-.43 2.092-1.194 2.849L18.5 11.214l-5.8-5.71 1.287-1.31.012-.012Zm-2.717 2.763L6.186 12.13l2.175 2.141 5.063-5.218-2.141-2.108Zm-6.25 6.886-1.98 5.849a.992.992 0 0 0 .245 1.026 1.03 1.03 0 0 0 1.043.242L10.282 19l-5.25-5.168Zm6.954 4.01 5.096-5.186-2.218-2.183-5.063 5.218 2.185 2.15Z" clip-rule="evenodd"/>
-                                    </svg>
+                                <div id="edit-group-name-form" class="hidden mt-2">
+                                    <%= form_with model: @chat_room, url: update_group_name_chat_room_path(@chat_room), method: :patch do |f| %>
+                                        <%= f.text_field :name, class: "border rounded p-1" %>
+                                        <%= f.submit "Save", class: "bg-green-500 text-white px-2 py-1 rounded ml-2 hover:cursor-pointer hover:bg-green-700" %>
+                                        <%= button_to "Cancel", chat_room_path(@chat_room), class: "bg-pink-600 text-white px-2 py-1 rounded ml-2 hover:cursor-pointer hover:bg-pink-800" %>
+                                    <% end %>
                                 </div>
+                            <% else %>
+                                <h3 class="font-medium"><%= @chat_room.name %></h3>
+                            <% end %>
+                            
+                            <p class="text-sm text-gray-500">Online</p>
+                        <%end%>
+                    </div>
+                </div>
+                <div class="flex items-center mr-20 space-x-7 ">
+                    <div id="dropdownButton" class="relative ml-3">
+                        <div onclick="document.getElementById('group_member_show').classList.toggle('hidden');">
+                            <svg class="w-6 h-6 text-gray-800 hover:cursor-pointer hover:text-pink-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" d="M12 6a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm-1.5 8a4 4 0 0 0-4 4 2 2 0 0 0 2 2h7a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-3Zm6.82-3.096a5.51 5.51 0 0 0-2.797-6.293 3.5 3.5 0 1 1 2.796 6.292ZM19.5 18h.5a2 2 0 0 0 2-2 4 4 0 0 0-4-4h-1.1a5.503 5.503 0 0 1-.471.762A5.998 5.998 0 0 1 19.5 18ZM4 7.5a3.5 3.5 0 0 1 5.477-2.889 5.5 5.5 0 0 0-2.796 6.293A3.501 3.501 0 0 1 4 7.5ZM7.1 12H6a4 4 0 0 0-4 4 2 2 0 0 0 2 2h.5a5.998 5.998 0 0 1 3.071-5.238A5.505 5.505 0 0 1 7.1 12Z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div id="group_member_show" role="menu" tabindex="-1" aria-labelledby="user-menu-button" aria-orientation="vertical" class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-hidden outline-hidden hidden">
+                            <!-- Active: "bg-gray-100 outline-hidden", Not Active: "" -->
+                            <div class=" flex item-center justify-center px-4 py-2 text-sm text-gray-700 border-b">
+                                <p class="font-medium">Group Member List</p>
                             </div>
-
-                            <div id="edit-group-name-form" class="hidden mt-2">
-                                <%= form_with model: @chat_room, url: update_group_name_chat_room_path(@chat_room), method: :patch, local: true do |f| %>
-                                    <%= f.text_field :name, class: "border rounded p-1" %>
-                                    <%= f.submit "Save", class: "bg-green-600 text-white px-2 py-1 rounded ml-2" %>
+                            
+                            <div class="px-4 py-2 space-y-2">
+                                <% if @current_member_is_admin && @chat_room.group_chat? %>
+                                    <div>
+                                        <%= form_with url: promote_to_moderator_chat_room_path(@chat_room), method: :patch, local: true do |f| %>
+                                            <div class="mb-2">
+                                            <% @members_for_promotion.each do |membership| %>
+                                                <div class="flex items-center space-x-2">
+                                                    <%= check_box_tag "user_ids[]", membership.user.id, false, id: "user_#{membership.user.id}", class:"rounded text-indigo-600" %>
+                                                    <%= label_tag "user_#{membership.user.id}", membership.user.name %>
+                                                </div>
+                                            <% end %>
+                                            </div>
+                                            <div class="px-4 py-2 border-t">
+                                                <%= f.submit "Add Moderator", class: "bg-pink-700 text-white px-3 py-1 rounded hover:cursor-pointer " %>
+                                            </div>
+                                        <% end %>
+                                    </div>
                                 <% end %>
                             </div>
-                        <% else %>
-                            <h3 class="font-medium"><%= @chat_room.name %></h3>
-                        <% end %>
-                        
-                        <p class="text-sm text-gray-500">Online</p>
-                    <%end%>
+                            
+                        </div>
+                    </div>
+                    <div id="dropdownButton" class="relative ml-3">
+                        <div onclick="document.getElementById('group_member_show_1').classList.toggle('hidden');">
+                            <svg class="w-6 h-6 text-gray-800 hover:cursor-pointer hover:text-pink-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" d="M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H7Zm8-1a1 1 0 0 1 1-1h1v-1a1 1 0 1 1 2 0v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1h-1a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div id="group_member_show_1" role="menu" tabindex="-1" aria-labelledby="user-menu-button" aria-orientation="vertical" class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-hidden outline-hidden hidden">
+                            <!-- Active: "bg-gray-100 outline-hidden", Not Active: "" -->
+                            <div class="px-4 py-2 text-sm text-gray-700 border-b">
+                                <p class="font-medium">System User List without group member</p>
+                            </div>
+                            <div class="px-4 py-2 space-y-2">
+                            <% if (@current_member_is_admin || @current_member_is_moderator) && @chat_room.group_chat? %>
+                                <div>
+                                    <%= form_with url: admin_and_moderator_can_add_new_member_chat_room_path(@chat_room), method: :post, local: true do |admin| %>
+                                        <div class="mb-4">
+                                            <% @members_not_in_groups.each do |user| %>
+                                                <div>
+                                                    <%= check_box_tag "user_ids[]", user.id, false, id: "user_#{user.id}" %>
+                                                    <%= label_tag "user_#{user.id}", user.name %>
+                                                </div>
+                                            <%end%>
+                                        </div>
+                                        <%= admin.submit "Add New Member", class: "bg-pink-700 text-white px-3 py-1 rounded hover:cursor-pointer " %>
+                                    <%end%>
+                                </div>
+                            <%end%>
+                            </div>
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
 

@@ -153,7 +153,6 @@ class ChatRoomsController < ApplicationController
     def ensure_user_is_member
       @chat_room = ChatRoom.find(params[:id])
       unless @chat_room.users.include?(current_user)
-        flash[:alert] = "You are not authorized to access this chat."
         redirect_to root_path
       end
     end
