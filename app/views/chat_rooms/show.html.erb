@@ -1,24 +1,31 @@
 <body class="bg-gray-100 h-screen">
     <div class="flex h-full">
-        <!-- Sidebar 
+        <!-- Sidebar -->
         <div class="w-64 bg-white border-r border-gray-200 flex flex-col">
             <div class="p-4 border-b border-gray-200">
                 <h1 class="text-xl font-semibold">Messages</h1>
             </div>
             <div class="flex-1 overflow-y-auto">
-                 Chat list 
+                 <!-- Chat list --> 
+                 <% @current_user_chat_rooms.each do |m| %>
                 <div class="p-4 border-b border-gray-200 hover:bg-gray-50 cursor-pointer">
                     <div class="flex items-center">
                         <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">JD</div>
                         <div class="ml-3">
-                            <h3 class="font-medium">John Doe</h3>
+                            <% if m.private_chat? %>
+                                <h3 class="font-medium"><%= m.users.where.not(id: current_user.id).first.name %></h3>
+                            <% else %>
+                                <h3 class="font-medium"><%= m.name %></h3>
+                            <%end%>
                             <p class="text-sm text-gray-500 truncate">Hey, how are you doing?</p>
                         </div>
                         <div class="ml-auto text-xs text-gray-500">2:30 PM</div>
                     </div>
-                </div>                
+                </div>      
+                <% end %>          
             </div>
-        </div> -->
+        </div> 
+            <!--
             <div>
                 <div>
                     <% if @current_member_is_admin %>
@@ -29,7 +36,7 @@
                         <%= form_with url: admin_remove_member_chat_room_path(@chat_room), method: :delete, local: true do |d| %>
                             <div class="mb-4">
                                 <% @chat_room.chat_memberships.each do |membership| %>
-                                    <% unless membership.admin? %> <!-- Admin remove option hidden -->
+                                    <% unless membership.admin? %> 
                                         <div>
                                             <%= check_box_tag "user_ids[]", membership.user.id, false, id: "user_#{membership.user.id}" %>
                                             <%= label_tag "user_#{membership.user.id}", membership.user.name %>
@@ -43,6 +50,7 @@
                     <% end %>
                 </div>
             </div>
+            -->
             
 
         <!-- Main chat area -->

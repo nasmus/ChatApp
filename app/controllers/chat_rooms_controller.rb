@@ -136,6 +136,7 @@ class ChatRoomsController < ApplicationController
   end
 
 
+
   def show
     @messages = @chat_room.messages.order(:created_at)
     @message = Message.new
@@ -145,6 +146,7 @@ class ChatRoomsController < ApplicationController
     admin_membership = @chat_room.chat_memberships.find_by(user_id: current_user.id)
     @current_member_is_admin = admin_membership&.admin?
     @current_member_is_moderator = admin_membership&.moderator?
+    @current_user_chat_rooms = current_user.chat_rooms.order(created_at: :desc)
   end
 
 
