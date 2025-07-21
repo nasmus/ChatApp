@@ -7,21 +7,23 @@
             </div>
             <div class="flex-1 overflow-y-auto">
                  <!-- Chat list --> 
-                 <% @current_user_chat_rooms.each do |m| %>
-                <div class="p-4 border-b border-gray-200 hover:bg-gray-50 cursor-pointer">
-                    <div class="flex items-center">
-                        <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">JD</div>
-                        <div class="ml-3">
-                            <% if m.private_chat? %>
-                                <h3 class="font-medium"><%= m.users.where.not(id: current_user.id).first.name %></h3>
-                            <% else %>
-                                <h3 class="font-medium"><%= m.name %></h3>
-                            <%end%>
-                            <p class="text-sm text-gray-500 truncate">Hey, how are you doing?</p>
-                        </div>
-                        <div class="ml-auto text-xs text-gray-500">2:30 PM</div>
-                    </div>
-                </div>      
+                <% @current_user_chat_rooms.each do |m| %>
+                    <%= link_to chat_room_path(m), class: "block" do %>
+                        <div class="p-4 border-b border-gray-200 hover:bg-gray-50 cursor-pointer">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">JD</div>
+                                <div class="ml-3">
+                                    <% if m.private_chat? %>
+                                        <h3 class="font-medium"><%= m.users.where.not(id: current_user.id).first.name %></h3>
+                                    <% else %>
+                                        <h3 class="font-medium"><%= m.name %></h3>
+                                    <%end%>
+                                    <p class="text-sm text-gray-500 truncate"><%= m.messages.last&.content || "No messages yet" %></p>
+                                </div>
+                                <div class="ml-auto text-xs text-gray-500"><%= m.messages.last&.created_at&.strftime("%I:%M %p") || "" %></div>
+                            </div>
+                        </div>      
+                    <% end %>
                 <% end %>          
             </div>
         </div> 
@@ -163,10 +165,7 @@
                     
                 </div>
             </div>
-
            
-
-
             
             <!-- Messages -->
             <div class="flex-1 p-4 overflow-y-auto bg-gray-50">
@@ -179,7 +178,7 @@
                                     <div class="bg-white rounded-lg py-2 px-4 shadow-sm max-w-xs">
                                         <p><%= message.content %></p>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-1">10:30 AM</p>
+                                    <p class="text-xs text-gray-500 mt-1"><%= message.created_at&.strftime("%I:%M %p") || "" %></p>
                                     <% if @current_member_is_admin || @current_member_is_moderator %>
                                         <%= button_to "Delete", destroy_group_message_chat_room_path(@chat_room, message_id: message.id), method: :delete, alert: { confirm: "Are you sure?" }, class: "text-red-500 ml-2 hover:cursor-pointer" %>
                                     <% end %>
@@ -192,7 +191,7 @@
                             <div class="bg-blue-500 text-white rounded-lg py-2 px-4 shadow-sm max-w-xs">
                                 <p><%= message.content %></p>
                             </div>
-                            <p class="text-xs text-gray-500 mt-1">10:32 AM</p>
+                            <p class="text-xs text-gray-500 mt-1"><%= message.created_at&.strftime("%I:%M %p") || "" %></p>
                         </div>
                         <div class="w-8 h-8 rounded-full bg-blue-500 flex-shrink-0"></div>
                     </div>
