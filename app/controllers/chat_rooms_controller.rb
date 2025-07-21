@@ -3,7 +3,6 @@ class ChatRoomsController < ApplicationController
   before_action :set_chat_room, only: [:promote_to_moderator, :destroy, :admin_and_moderator_can_add_new_member, :show, :admin_remove_member, :destroy_group_message, :edit, :update_group_name]
   before_action :ensure_current_user_is_admin, only: [:promote_to_moderator, :admin_remove_member, :edit, :update_group_name]
 
-
   def create_private_chat
     recipient = User.find(params[:user_id])
 
@@ -173,9 +172,13 @@ class ChatRoomsController < ApplicationController
   private 
     #can't access any other chat
     def ensure_user_is_member
-      @chat_room = ChatRoom.find(params[:id])
-      unless @chat_room.users.include?(current_user)
-        redirect_to root_path
+      begin
+        @chat_room = ChatRoom.find(params[:id])
+        unless @chat_room.users.include?(current_user)
+          redirect_to root_path
+        end
+      rescue ActiveRecord::RecordNotFound
+        redirect_to root_path, alert: "Chat room not found."
       end
     end
 
