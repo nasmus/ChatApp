@@ -35,19 +35,19 @@
                             <h1 class="text-lg font-semibold mt-8 item-center p-1 bg-cyan-800 text-white item-center"> All User List </h1>
                         </div>
                         <div>
-                        <%= form_with url: admin_remove_member_chat_room_path(@chat_room), method: :delete, local: true do |d| %>
-                            <div class="mb-4">
-                                <% @chat_room.chat_memberships.each do |membership| %>
-                                    <% unless membership.admin? %> 
-                                        <div>
-                                            <%= check_box_tag "user_ids[]", membership.user.id, false, id: "user_#{membership.user.id}" %>
-                                            <%= label_tag "user_#{membership.user.id}", membership.user.name %>
-                                        </div>
-                                    <% end %>
-                                <%end%>
-                            </div>
-                            <%= d.submit "Remove member", class: "bg-pink-700 text-white px-3 py-1 rounded hover:cursor-pointer " %>
-                        <%end%>
+                            <%= form_with url: admin_remove_member_chat_room_path(@chat_room), method: :delete, local: true do |d| %>
+                                <div class="mb-4">
+                                    <% @chat_room.chat_memberships.each do |membership| %>
+                                        <% unless membership.admin? %> 
+                                            <div>
+                                                <%= check_box_tag "user_ids[]", membership.user.id, false, id: "user_#{membership.user.id}" %>
+                                                <%= label_tag "user_#{membership.user.id}", membership.user.name %>
+                                            </div>
+                                        <% end %>
+                                    <%end%>
+                                </div>
+                                <%= d.submit "Remove member", class: "bg-pink-700 text-white px-3 py-1 rounded hover:cursor-pointer " %>
+                            <%end%>
                         </div>
                     <% end %>
                 </div>
@@ -113,19 +113,23 @@
                             <div class="px-4 py-2 space-y-2">
                                 <% if @current_member_is_admin && @chat_room.group_chat? %>
                                     <div>
-                                        <%= form_with url: promote_to_moderator_chat_room_path(@chat_room), method: :patch, local: true do |f| %>
-                                            <div class="mb-2">
-                                            <% @members_for_promotion.each do |membership| %>
-                                                <div class="flex items-center space-x-2">
-                                                    <%= check_box_tag "user_ids[]", membership.user.id, false, id: "user_#{membership.user.id}", class:"rounded text-indigo-600" %>
-                                                    <%= label_tag "user_#{membership.user.id}", membership.user.name %>
-                                                </div>
-                                            <% end %>
+                                        <%= form_with url: admin_remove_member_chat_room_path(@chat_room), method: :delete, local: true do |d| %>
+                                            <div class="mb-4">
+                                                <% @chat_room.chat_memberships.each do |membership| %>
+                                                    <% unless membership.admin? %> 
+                                                        <div>
+                                                            <%= check_box_tag "user_ids[]", membership.user.id, false, id: "user_#{membership.user.id}" %>
+                                                            <!-- <%= label_tag "user_#{membership.user.id}", membership.user.name %> -->
+                                                            <%= label_tag "user_#{membership.user.id}", "#{membership.user.name}#{' (Moderator)' if membership.chat_role == 'moderator'}" %>
+                                                        </div>
+                                                    <% end %>
+                                                <%end%>
                                             </div>
-                                            <div class="px-4 py-2 border-t">
-                                                <%= f.submit "Add Moderator", class: "bg-pink-700 text-white px-3 py-1 rounded hover:cursor-pointer " %>
-                                            </div>
-                                        <% end %>
+                                            <div class="flex space-x-2">
+                                                <%= d.submit "Remove",name: "remove_member" ,class: "bg-pink-700 text-white px-3 py-1 rounded hover:cursor-pointer " %>
+                                                <%= d.submit "Add ",name: "make_moderator"  ,class: "bg-pink-700 text-white px-3 py-1 rounded hover:cursor-pointer " %>
+                                            </div>                                            
+                                        <%end%>
                                     </div>
                                 <% end %>
                             </div>

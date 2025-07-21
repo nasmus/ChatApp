@@ -110,6 +110,26 @@ class ChatRoomsController < ApplicationController
     redirect_to chat_room_path(@chat_room), notice: "member is successfully deleted"
   end
 
+
+  #update members make moderator and remove from group chat
+  def update_members
+    user_ids = params[:user_ids] || []
+    if params[:make_moderator]
+      user_ids.each do |user_id|
+        membership = ChatMembership.find_by(chat_room_id: params[:id], user_id: user_id)
+        membership.update(chat_role: :moderator) if membership
+      end
+      redirect_to chat_room_path(@chat_room), notice: "Selected members promoted to moderator."
+    elsif params[:remove_member]
+      user_ids.each do |user_id|
+        membership = @chat_room.chat_memberships.find_by(user_id: user_id)
+        if membership && !membership.admin?
+          membership.destroy
+        end
+      end
+      redirect_to chat_room_path(@chat_room), notice: "Selected members removed from the group."
+    end
+  end
   
   #admin and moderator can delete suspicias group message
   def destroy_group_message
@@ -167,6 +187,7 @@ class ChatRoomsController < ApplicationController
     def chat_room_params
       params.require(:chat_room).permit(:name)
     end
+
 
     #cureent user is admin or not
     def ensure_current_user_is_admin
