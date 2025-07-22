@@ -13,6 +13,7 @@ Rails.application.routes.draw do
       delete :admin_remove_member
       delete :destroy_group_message
       patch :update_group_name
+      post :update_members
     end
     collection do
       get :new_group

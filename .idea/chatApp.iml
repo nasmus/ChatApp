@@ -28,12 +28,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" scope="PROVIDED" name="bundler (v2.6.7, ruby-3.4.3-p32) [gem]" level="application" />
-    <orderEntry type="library" scope="PROVIDED" name="io-console (v0.8.0, ruby-3.4.3-p32) [gem]" level="application" />
-    <orderEntry type="library" scope="PROVIDED" name="net-pop (v0.1.2, ruby-3.4.3-p32) [gem]" level="application" />
-    <orderEntry type="library" scope="PROVIDED" name="net-smtp (v0.5.1, ruby-3.4.3-p32) [gem]" level="application" />
-    <orderEntry type="library" scope="PROVIDED" name="racc (v1.8.1, ruby-3.4.3-p32) [gem]" level="application" />
-    <orderEntry type="library" scope="PROVIDED" name="uri (v1.0.3, ruby-3.4.3-p32) [gem]" level="application" />
   </component>
   <component name="RModuleSettingsStorage">
     <LOAD_PATH number="0" />

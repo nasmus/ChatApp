@@ -1,7 +1,7 @@
 class ChatRoomsController < ApplicationController
   before_action :ensure_user_is_member, only: [:show]
-  before_action :set_chat_room, only: [:promote_to_moderator, :destroy, :admin_and_moderator_can_add_new_member, :show, :admin_remove_member, :destroy_group_message, :edit, :update_group_name]
-  before_action :ensure_current_user_is_admin, only: [:promote_to_moderator, :admin_remove_member, :edit, :update_group_name]
+  before_action :set_chat_room, only: [:promote_to_moderator, :destroy, :admin_and_moderator_can_add_new_member, :show, :admin_remove_member, :destroy_group_message, :edit, :update_group_name, :update_members]
+  before_action :ensure_current_user_is_admin, only: [:promote_to_moderator, :admin_remove_member, :edit, :update_group_name, :update_members]
 
   def create_private_chat
     recipient = User.find(params[:user_id])

@@ -113,7 +113,7 @@
                             <div class="px-4 py-2 space-y-2">
                                 <% if @current_member_is_admin && @chat_room.group_chat? %>
                                     <div>
-                                        <%= form_with url: admin_remove_member_chat_room_path(@chat_room), method: :delete, local: true do |d| %>
+                                        <%= form_with url: update_members_chat_room_path(@chat_room), method: :post, local: true do |d| %>
                                             <div class="mb-4">
                                                 <% @chat_room.chat_memberships.each do |membership| %>
                                                     <% unless membership.admin? %> 
